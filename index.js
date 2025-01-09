@@ -3,7 +3,7 @@ import bodyParser from "body-parser";
 import pg from "pg";
 
 const app = express();
-const port = 3006;
+const port = 3003;
 
 const db = new pg.Client({
     user: "postgres",
@@ -45,9 +45,15 @@ app.post("/add", async (req, res) => {
     try {
         const countryName = req.body.country;
         const result = await db.query(
-            "SELECT country_code FROM countries WHERE country_name like $1", 
-            [`%${countryName}%`]  // Adding wildcards dynamically
-          );
+            "SELECT country_code FROM countries WHERE country_name like '%' || $1 || '%' ",
+            [countryName] // Adding wildcards dynamically
+        );
+        /*
+        const result = await db.query(
+            "SELECT country_code FROM countries WHERE country_name like $1 ",
+            [`%${countryName}%`] // Adding wildcards dynamically
+
+        */
 
         const countryCode = result.rows[0].country_code;
         try {
@@ -74,6 +80,6 @@ app.post("/add", async (req, res) => {
         })
     }
 });
-                app.listen(port, () => {
-                    console.log(`Server running on http://localhost:${port}`);
-                });
+app.listen(port, () => {
+    console.log(`Server running on http://localhost:${port}`);
+});
