@@ -42,69 +42,38 @@ app.get("/", async (req, res) => {
 
 app.post("/add", async (req, res) => {
 
-                try {
-                    const countryName = req.body.country;
-                    // const result = await db.query(
-                    //     "SELECT country_code FROM countries WHERE country_name LIKE $1", 
-                    //     [`%${countryName}%`]  // Adding wildcards dynamically
-                    //   );
-                    const result = await db.query(
-                        "SELECT country_code FROM countries WHERE country_name = $1",[countryName]);
-                    const countryCode = result.rows[0].country_code;
-                    try {
-                        await db.query(
-                        "INSERT INTO visited_countries (country_code) VALUES ($1)",
-                        [countryCode]);
-                        res.redirect('/');
-                    } catch (err) {
-                        console.error("Error occurred while retrieving data", err);
-                        const countries = await checkVisited();
-                        res.render("index.ejs", {
-                                countries: countries,
-                                error: "Country has already been added, try again",
-                                total: countries.length
-                            })
-                        }
-                    }
-                    catch (err) {
-                        console.error("Error occurred while retrieving data", err);
-                        const countries = await checkVisited();
-                        res.render("index.ejs", {
-                                countries: countries,
-                                error: "Country doesn't exists.",
-                                total: countries.length
-                            }
-                        )
-                    }
-                  });
+    try {
+        const countryName = req.body.country;
+        const result = await db.query(
+            "SELECT country_code FROM countries WHERE country_name like $1", 
+            [`%${countryName}%`]  // Adding wildcards dynamically
+          );
 
+        const countryCode = result.rows[0].country_code;
+        try {
+            await db.query(
+                "INSERT INTO visited_countries (country_code) VALUES ($1)",
+                [countryCode]);
+            res.redirect('/');
+        } catch (err) {
+            console.error("Error occurred while retrieving data", err);
+            const countries = await checkVisited();
+            res.render("index.ejs", {
+                countries: countries,
+                error: "Country has already been added, try again",
+                total: countries.length
+            })
+        }
+    } catch (err) {
+        console.error("Error occurred while retrieving data", err);
+        const countries = await checkVisited();
+        res.render("index.ejs", {
+            countries: countries,
+            error: "Country doesn't exists.",
+            total: countries.length
+        })
+    }
+});
                 app.listen(port, () => {
                     console.log(`Server running on http://localhost:${port}`);
                 });
-
-                /*
-
-                try {
-                                    const countryName = req.body.country;
-                                    const result = await db.query("SELECT country_code FROM countries WHERE country_name = $1", [countryName]);
-                                    const countryCode = result.rows[0].country_code;
-                                    try {
-                                        await dp.query("insert into visited_countries (country_code) VALUES ($1)", [countryCode]);
-                                        res.redirect('/')
-                                      }
-                                    catch (err) {
-                                      console.error("Error occurred while retrieving data", err);
-                                      const countries = await checkVisited();
-                                      res.render("index.ejs", {
-                                            countries: countries,
-                                            error: "Country has already been added, try again",
-                                            total: countries.length
-                                            }
-                                        }
-                                  catch (err) {
-
-                                        }
-                              })
-
-
-                */
